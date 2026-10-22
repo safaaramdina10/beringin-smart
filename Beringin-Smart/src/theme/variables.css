@@ -1,0 +1,205 @@
+/**
+ * Beringin Smart - Design System & Visual Identity
+ * Edition: Safa Ramdina (Sunset Coral & Rose Velvet)
+ * Atmosphere: Warm Sunset Rose & Radiant Velvet Glow
+ * Typography: Outfit & Plus Jakarta Sans
+ */
+
+:root {
+  --font-family-base: 'Outfit', 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+
+  /* Primary Palette (Sunset Coral & Rose Red) */
+  --ion-color-primary: #e11d48;
+  --ion-color-primary-rgb: 225, 29, 72;
+  --ion-color-primary-contrast: #ffffff;
+  --ion-color-primary-shade: #be123c;
+  --ion-color-primary-tint: #fb7185;
+
+  /* Secondary (Velvet Wine Dark Slate) */
+  --ion-color-secondary: #881337;
+  --ion-color-secondary-rgb: 136, 19, 55;
+  --ion-color-secondary-contrast: #ffffff;
+
+  /* Success (Teal Emerald) */
+  --ion-color-success: #10b981;
+  --ion-color-success-rgb: 16, 185, 129;
+  --ion-color-success-contrast: #ffffff;
+
+  /* Warning (Warm Sunset Amber) */
+  --ion-color-warning: #f59e0b;
+  --ion-color-warning-rgb: 245, 158, 11;
+  --ion-color-warning-contrast: #ffffff;
+
+  /* Danger (Deep Crimson) */
+  --ion-color-danger: #be123c;
+  --ion-color-danger-rgb: 190, 18, 60;
+  --ion-color-danger-contrast: #ffffff;
+
+  /* Light Surface Backgrounds */
+  --ion-background-color: #fff8f8;
+  --ion-card-background: #ffffff;
+
+  /* Gradients */
+  --bg-gradient-header: linear-gradient(135deg, #4c0519 0%, #881337 55%, #be123c 100%);
+  --bg-gradient-primary: linear-gradient(135deg, #e11d48 0%, #f43f5e 50%, #fb7185 100%);
+  --bg-gradient-card-rose: linear-gradient(135deg, #fff1f2 0%, #ffe4e6 100%);
+  --bg-gradient-card-amber: linear-gradient(135deg, #fffbeb 0%, #fef3c7 100%);
+  --bg-gradient-card-teal: linear-gradient(135deg, #f0fdf4 0%, #dcfce7 100%);
+
+  /* Shadows */
+  --card-shadow: 0 8px 24px -4px rgba(225, 29, 72, 0.08), 0 2px 6px -1px rgba(0, 0, 0, 0.03);
+  --card-shadow-hover: 0 14px 32px -4px rgba(225, 29, 72, 0.18), 0 6px 14px -2px rgba(0, 0, 0, 0.05);
+}
+
+/* Global Typography Override */
+* {
+  font-family: var(--font-family-base) !important;
+}
+
+body {
+  background-color: #fff8f8;
+  color: #1e1b4b;
+  -webkit-font-smoothing: antialiased;
+}
+
+/* Custom Styled Elements for Safa's Edition */
+.bs-header-glass {
+  background: var(--bg-gradient-header) !important;
+  color: #ffffff;
+  border-bottom: 1px solid rgba(251, 113, 133, 0.2);
+}
+
+.bs-card-stat {
+  border-radius: 20px;
+  border: 1px solid rgba(225, 29, 72, 0.1);
+  box-shadow: var(--card-shadow);
+  transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.bs-card-stat:hover {
+  transform: translateY(-3px);
+  box-shadow: var(--card-shadow-hover);
+}
+
+.bs-ticket-item {
+  border-radius: 18px;
+  border: 1px solid #fecdd3;
+  box-shadow: 0 2px 8px rgba(225, 29, 72, 0.04);
+  transition: all 0.2s ease;
+  background: #ffffff;
+}
+
+.bs-ticket-item:hover {
+  border-color: #fb7185;
+  transform: translateY(-2px);
+  box-shadow: 0 8px 20px rgba(225, 29, 72, 0.12);
+}
+
+/* Pill Status Badges */
+.bs-badge-pending {
+  background: #fffbeb;
+  color: #b45309;
+  border: 1px solid #fde68a;
+  font-weight: 700;
+  font-size: 0.76rem;
+  letter-spacing: 0.2px;
+  padding: 4px 12px;
+  border-radius: 9999px;
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+}
+
+.bs-badge-progress {
+  background: #fff1f2;
+  color: #be123c;
+  border: 1px solid #fecdd3;
+  font-weight: 700;
+  font-size: 0.76rem;
+  letter-spacing: 0.2px;
+  padding: 4px 12px;
+  border-radius: 9999px;
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+}
+
+.bs-badge-completed {
+  background: #f0fdf4;
+  color: #047857;
+  border: 1px solid #a7f3d0;
+  font-weight: 700;
+  font-size: 0.76rem;
+  letter-spacing: 0.2px;
+  padding: 4px 12px;
+  border-radius: 9999px;
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+}
+
+/* Pulsing Dot Indicator */
+.bs-pulse-dot {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background-color: currentColor;
+  box-shadow: 0 0 0 0 rgba(245, 158, 11, 0.7);
+  animation: bs-pulse 1.8s infinite;
+}
+
+@keyframes bs-pulse {
+  0% {
+    transform: scale(0.95);
+    box-shadow: 0 0 0 0 rgba(245, 158, 11, 0.7);
+  }
+  70% {
+    transform: scale(1);
+    box-shadow: 0 0 0 6px rgba(245, 158, 11, 0);
+  }
+  100% {
+    transform: scale(0.95);
+    box-shadow: 0 0 0 0 rgba(245, 158, 11, 0);
+  }
+}
+
+/* Modern Form Elements */
+.bs-form-card {
+  border-radius: 20px;
+  border: 1px solid #ffe4e6;
+  box-shadow: var(--card-shadow);
+  background: #ffffff;
+}
+
+/* Pill Buttons */
+.bs-btn-primary {
+  --background: var(--bg-gradient-primary);
+  --box-shadow: 0 6px 16px rgba(225, 29, 72, 0.35);
+  --border-radius: 9999px;
+  font-weight: 700;
+  letter-spacing: 0.2px;
+  transition: all 0.2s ease;
+}
+
+.bs-btn-primary:hover {
+  --box-shadow: 0 8px 24px rgba(225, 29, 72, 0.45);
+}
+
+/* Clean Scrollbars */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+::-webkit-scrollbar-track {
+  background: #fff1f2;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #fecdd3;
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #fb7185;
+}
