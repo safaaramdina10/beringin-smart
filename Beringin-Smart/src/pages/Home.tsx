@@ -72,9 +72,9 @@ const Home: React.FC = () => {
   const [selectedCategory, setSelectedCategory] = useState('Semua');
 
   // User Info & Role
-  const userRole = localStorage.getItem('role') || 'siswa';
   const userJson = localStorage.getItem('user');
   const currentUser = userJson ? JSON.parse(userJson) : null;
+  const userRole = localStorage.getItem('role') === 'petugas' || currentUser?.role === 'petugas' ? 'petugas' : 'siswa';
 
   // Handler Logout
   const handleLogout = () => {

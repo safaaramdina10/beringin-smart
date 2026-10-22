@@ -27,18 +27,23 @@ import {
 } from 'ionicons/icons';
 import { useParams } from 'react-router-dom';
 import { LaporanContext } from '../context/LaporanContext';
+import { Laporan } from '../types/laporan';
+import api from '../services/api';
 
 const Detail: React.FC = () => {
   const { id } = useParams<{ id: string }>();
   const idLaporan = id || '';
-  const { getLaporanById, ubahStatusLaporan } = useContext(LaporanContext);
+  const { getLaporanById, ubahStatusLaporan, laporanList } = useContext(LaporanContext);
+  const [laporan, setLaporan] = useState<Laporan | null>(null);
+  const [fetching, setFetching] = useState<boolean>(true);
   const [loading, setLoading] = useState(false);
   const [showToast, setShowToast] = useState(false);
   const [toastMsg, setToastMsg] = useState('');
   const [toastColor, setToastColor] = useState('dark');
 
-  const laporan = getLaporanById(idLaporan);
-  const role = localStorage.getItem('role') || 'siswa';
+  const userJson = localStorage.getItem('user');
+  const currentUser = userJson ? JSON.parse(userJson) : null;
+  const role = localStorage.getItem('role') === 'petugas' || currentUser?.role === 'petugas' ? 'petugas' : 'siswa';
 
   // Auth Guard: Arahkan ke /login jika belum ada token
   useEffect(() => {
@@ -47,6 +52,35 @@ const Detail: React.FC = () => {
     }
   }, []);
 
+  // Fetch / Retrieve Laporan reliably even on direct link or full refresh
+  useEffect(() => {
+    let isMounted = true;
+    const item = getLaporanById(idLaporan);
+    if (item) {
+      setLaporan(item);
+      setFetching(false);
+    } else {
+      setFetching(true);
+      api
+        .get('/laporan')
+        .then((res) => {
+          if (!isMounted) return;
+          const list: Laporan[] = res.data?.data || res.data || [];
+          const found = list.find((it) => String(it.id) === String(idLaporan));
+          if (found) {
+            setLaporan(found);
+          }
+        })
+        .catch((err) => console.error('Gagal mengambil detail laporan:', err))
+        .finally(() => {
+          if (isMounted) setFetching(false);
+        });
+    }
+    return () => {
+      isMounted = false;
+    };
+  }, [idLaporan, laporanList]);
+
   const handleSelesai = async () => {
     if (!idLaporan) return;
     setLoading(true);
@@ -54,6 +88,7 @@ const Detail: React.FC = () => {
     setLoading(false);
 
     if (success) {
+      setLaporan((prev) => (prev ? { ...prev, status: 'Selesai' } : null));
       setToastMsg('Status laporan berhasil diperbarui menjadi Selesai!');
       setToastColor('success');
       setShowToast(true);
@@ -64,21 +99,80 @@ const Detail: React.FC = () => {
     }
   };
 
+  if (fetching) {
+    return (
+      <IonPage>
+        <IonHeader className="ion-no-border">
+          <IonToolbar
+            style={
+              {
+                '--background': 'linear-gradient(135deg, #4c0519 0%, #881337 55%, #be123c 100%)',
+                '--color': '#ffffff',
+              } as React.CSSProperties
+            }
+          >
+            <IonButtons slot="start">
+              <IonBackButton defaultHref="/home" text="KEMBALI" color="light" />
+            </IonButtons>
+            <IonTitle style={{ fontWeight: 800, fontFamily: "'Outfit', sans-serif" }}>
+              Memuat Rincian...
+            </IonTitle>
+          </IonToolbar>
+        </IonHeader>
+        <IonContent
+          className="ion-padding ion-text-center"
+          style={{ '--background': '#fff8f8' } as React.CSSProperties}
+        >
+          <div style={{ padding: '80px 20px' }}>
+            <IonSpinner name="crescent" color="primary" style={{ width: '42px', height: '42px' }} />
+            <p style={{ marginTop: '14px', color: '#881337', fontWeight: 700, fontSize: '0.92rem' }}>
+              Memuat data tiket pengaduan sarpras...
+            </p>
+          </div>
+        </IonContent>
+      </IonPage>
+    );
+  }
+
   if (!laporan) {
     return (
       <IonPage>
         <IonHeader className="ion-no-border">
-          <IonToolbar style={{ '--background': 'linear-gradient(135deg, #881337 0%, #065f46 100%)', '--color': '#ffffff' } as React.CSSProperties}>
+          <IonToolbar
+            style={
+              {
+                '--background': 'linear-gradient(135deg, #4c0519 0%, #881337 55%, #be123c 100%)',
+                '--color': '#ffffff',
+              } as React.CSSProperties
+            }
+          >
             <IonButtons slot="start">
-              <IonBackButton defaultHref="/home" text="Kembali" color="light" />
+              <IonBackButton defaultHref="/home" text="KEMBALI" color="light" />
             </IonButtons>
-            <IonTitle style={{ fontWeight: 800, fontFamily: "'Outfit', sans-serif" }}>Rincian Pengaduan</IonTitle>
+            <IonTitle style={{ fontWeight: 800, fontFamily: "'Outfit', sans-serif" }}>
+              Rincian Pengaduan
+            </IonTitle>
           </IonToolbar>
         </IonHeader>
-        <IonContent className="ion-padding ion-text-center" style={{ '--background': '#fff8f8' } as React.CSSProperties}>
-          <div style={{ maxWidth: '400px', margin: '60px auto', padding: '32px', background: '#ffffff', borderRadius: '20px', border: '1px solid #e2e8f0', boxShadow: '0 8px 24px rgba(0,0,0,0.04)' }}>
+        <IonContent
+          className="ion-padding ion-text-center"
+          style={{ '--background': '#fff8f8' } as React.CSSProperties}
+        >
+          <div
+            style={{
+              maxWidth: '400px',
+              margin: '60px auto',
+              padding: '32px',
+              background: '#ffffff',
+              borderRadius: '20px',
+              border: '1px solid #ffe4e6',
+              boxShadow: '0 8px 24px rgba(225,29,72,0.06)',
+            }}
+          >
             <IonIcon icon={alertCircleOutline} style={{ fontSize: '3.2rem', color: '#f59e0b', marginBottom: '14px' }} />
-            <h3 style={{ margin: '0 0 6px 0', fontWeight: 800, color: '#881337', fontFamily: "'Outfit', sans-serif" }}>Data Tidak Ditemukan</h3>
+            <h3 style={{ margin: '0 0 6px 0', fontWeight: 800, color: '#881337', fontFamily: "'Outfit', sans-serif" }}>
+              Data Tidak Ditemukan
+            </h3>
             <p style={{ margin: 0, color: '#64748b', fontSize: '0.9rem' }}>
               Tiket pengaduan yang Anda cari tidak tersedia atau telah dihapus.
             </p>
@@ -93,11 +187,25 @@ const Detail: React.FC = () => {
   return (
     <IonPage>
       <IonHeader className="ion-no-border">
-        <IonToolbar style={{ '--background': 'linear-gradient(135deg, #881337 0%, #065f46 60%, #be123c 100%)', '--color': '#ffffff' } as React.CSSProperties}>
+        <IonToolbar
+          style={
+            {
+              '--background': 'linear-gradient(135deg, #4c0519 0%, #881337 55%, #be123c 100%)',
+              '--color': '#ffffff',
+            } as React.CSSProperties
+          }
+        >
           <IonButtons slot="start">
             <IonBackButton defaultHref="/home" text="KEMBALI" color="light" />
           </IonButtons>
-          <IonTitle style={{ fontWeight: 800, letterSpacing: '-0.2px', fontSize: '1.05rem', fontFamily: "'Outfit', sans-serif" }}>
+          <IonTitle
+            style={{
+              fontWeight: 800,
+              letterSpacing: '-0.2px',
+              fontSize: '1.05rem',
+              fontFamily: "'Outfit', sans-serif",
+            }}
+          >
             Rincian Tiket #{laporan.id}
           </IonTitle>
         </IonToolbar>
@@ -110,8 +218,8 @@ const Detail: React.FC = () => {
             style={{
               margin: 0,
               borderRadius: '22px',
-              boxShadow: '0 12px 32px -6px rgba(5, 150, 105, 0.1)',
-              border: '1px solid #e2e8f0',
+              boxShadow: '0 12px 32px -6px rgba(225, 29, 72, 0.12)',
+              border: '1px solid #ffe4e6',
               overflow: 'hidden',
               background: '#ffffff',
             }}
@@ -120,10 +228,10 @@ const Detail: React.FC = () => {
             <div
               style={{
                 background: isCompleted
-                  ? 'linear-gradient(135deg, #fff1f2 0%, #ffe4e6 100%)'
+                  ? 'linear-gradient(135deg, #f0fdf4 0%, #dcfce7 100%)'
                   : 'linear-gradient(135deg, #fffbeb 0%, #fef3c7 100%)',
                 padding: '16px 22px',
-                borderBottom: `1px solid ${isCompleted ? '#fecdd3' : '#fde68a'}`,
+                borderBottom: `1px solid ${isCompleted ? '#a7f3d0' : '#fde68a'}`,
                 display: 'flex',
                 alignItems: 'center',
                 justifyContent: 'space-between',
@@ -153,7 +261,7 @@ const Detail: React.FC = () => {
                     display: 'inline-flex',
                     alignItems: 'center',
                     gap: '6px',
-                    background: '#e11d48',
+                    background: '#059669',
                     color: '#ffffff',
                     padding: '5px 14px',
                     borderRadius: '9999px',
@@ -209,7 +317,17 @@ const Detail: React.FC = () => {
 
               {/* Rincian Masalah */}
               <div style={{ marginBottom: '24px' }}>
-                <label style={{ display: 'block', fontSize: '0.8rem', fontWeight: 700, color: '#64748b', textTransform: 'uppercase', letterSpacing: '0.5px', marginBottom: '8px' }}>
+                <label
+                  style={{
+                    display: 'block',
+                    fontSize: '0.8rem',
+                    fontWeight: 700,
+                    color: '#64748b',
+                    textTransform: 'uppercase',
+                    letterSpacing: '0.5px',
+                    marginBottom: '8px',
+                  }}
+                >
                   Deskripsi Kerusakan
                 </label>
                 <div
@@ -217,8 +335,8 @@ const Detail: React.FC = () => {
                     background: '#fff8f8',
                     padding: '16px',
                     borderRadius: '14px',
-                    border: '1px solid #e2e8f0',
-                    color: '#1e293b',
+                    border: '1px solid #ffe4e6',
+                    color: '#1e1b4b',
                     fontSize: '0.94rem',
                     lineHeight: '1.6',
                   }}
@@ -233,15 +351,25 @@ const Detail: React.FC = () => {
                   display: 'grid',
                   gridTemplateColumns: '1fr 1fr',
                   gap: '12px',
-                  background: '#f0fdf4',
+                  background: '#fff1f2',
                   padding: '14px 18px',
                   borderRadius: '14px',
-                  border: '1px solid #dcfce7',
+                  border: '1px solid #ffe4e6',
                   marginBottom: '24px',
                 }}
               >
                 <div>
-                  <div style={{ display: 'flex', alignItems: 'center', gap: '5px', color: '#be123c', fontSize: '0.74rem', fontWeight: 700, textTransform: 'uppercase' }}>
+                  <div
+                    style={{
+                      display: 'flex',
+                      alignItems: 'center',
+                      gap: '5px',
+                      color: '#be123c',
+                      fontSize: '0.74rem',
+                      fontWeight: 700,
+                      textTransform: 'uppercase',
+                    }}
+                  >
                     <IonIcon icon={personOutline} /> Pelapor
                   </div>
                   <div style={{ fontWeight: 800, color: '#881337', fontSize: '0.92rem', marginTop: '2px' }}>
@@ -250,7 +378,17 @@ const Detail: React.FC = () => {
                 </div>
 
                 <div>
-                  <div style={{ display: 'flex', alignItems: 'center', gap: '5px', color: '#be123c', fontSize: '0.74rem', fontWeight: 700, textTransform: 'uppercase' }}>
+                  <div
+                    style={{
+                      display: 'flex',
+                      alignItems: 'center',
+                      gap: '5px',
+                      color: '#be123c',
+                      fontSize: '0.74rem',
+                      fontWeight: 700,
+                      textTransform: 'uppercase',
+                    }}
+                  >
                     <IonIcon icon={calendarOutline} /> Tanggal Masuk
                   </div>
                   <div style={{ fontWeight: 800, color: '#881337', fontSize: '0.92rem', marginTop: '2px' }}>
@@ -277,7 +415,7 @@ const Detail: React.FC = () => {
                         height: '48px',
                         '--background': 'linear-gradient(135deg, #e11d48 0%, #be123c 100%)',
                         '--border-radius': '9999px',
-                        '--box-shadow': '0 8px 20px rgba(5, 150, 105, 0.35)',
+                        '--box-shadow': '0 8px 20px rgba(225, 29, 72, 0.35)',
                         fontWeight: 700,
                         fontSize: '0.92rem',
                       }}
@@ -296,12 +434,12 @@ const Detail: React.FC = () => {
                       style={{
                         textAlign: 'center',
                         padding: '12px',
-                        background: '#fff1f2',
+                        background: '#f0fdf4',
                         borderRadius: '9999px',
-                        color: '#be123c',
+                        color: '#047857',
                         fontWeight: 700,
                         fontSize: '0.85rem',
-                        border: '1px solid #fecdd3',
+                        border: '1px solid #a7f3d0',
                       }}
                     >
                       <IonIcon icon={informationCircleOutline} style={{ verticalAlign: 'middle', marginRight: '6px' }} />
@@ -316,9 +454,9 @@ const Detail: React.FC = () => {
                     padding: '12px',
                     background: '#fff8f8',
                     borderRadius: '9999px',
-                    color: '#64748b',
+                    color: '#881337',
                     fontSize: '0.82rem',
-                    border: '1px solid #e2e8f0',
+                    border: '1px solid #fecdd3',
                   }}
                 >
                   Status penanganan dipantau secara langsung oleh Petugas Sarpras

@@ -47,7 +47,8 @@ const Login: React.FC = () => {
 
       if (response.data && response.data.token) {
         localStorage.setItem('token', response.data.token);
-        localStorage.setItem('role', response.data.role);
+        const resolvedRole = response.data.role || response.data.user?.role || 'siswa';
+        localStorage.setItem('role', resolvedRole);
         localStorage.setItem('user', JSON.stringify(response.data.user));
         window.location.href = '/home';
       } else {
